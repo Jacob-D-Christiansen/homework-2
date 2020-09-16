@@ -9,6 +9,8 @@ struct arguments{
     pthread_mutex_t mutex;
 };
 
+//hello
+
 int counter = 0;
 int successes = 0;
 
@@ -52,6 +54,8 @@ int main()
     
     printf("Total sequences generated: %d\n", counter);
     printf("Number of correct sequences: %d\n", successes);
+    
+    printf("reeeee");
 }
 
 void *do_work(void *args)
