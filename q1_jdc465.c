@@ -3,96 +3,101 @@
 #include <pthread.h>
 #include <unistd.h>
 
-struct arguments{
+struct args
+{
     int id;
+    int *count;
+    int *suc;
     int *buffer;
     pthread_mutex_t mutex;
 };
 
-int counter = 0;
-int successes = 0;
-
-void *do_work(void *args);
+void *do_work(void *arg);
 
 int main()
 {
+    pthread_t threads[3];
+    struct args *arguments[3];
+    pthread_mutex_t mutex;
     int buffer[3];
+    int count[1] = {0};
+    int suc[1] = {0};
+    
+    pthread_mutex_init( &mutex, NULL );
     for(int i = 0; i < 3; i++)
     {
         buffer[i] = 0;
     }
-    struct arguments *args0, *args1, *args2;
-    pthread_t thread_0, thread_1, thread_2;
-    pthread_mutex_t mutex;
-    pthread_mutex_init(&mutex, NULL);
     
-    args0 = (struct arguments *) calloc(1, sizeof(struct arguments));
-    args1 = (struct arguments *) calloc(1, sizeof(struct arguments));
-    args2 = (struct arguments *) calloc(1, sizeof(struct arguments));
+    for(int i = 0; i < 3; i++)
+    {
+        arguments[i] = (struct args *)calloc(1, sizeof(struct args));
+        arguments[i]->id = i + 1;
+        arguments[i]->count = count;
+        arguments[i]->suc = suc;
+        arguments[i]->buffer = buffer;
+        arguments[i]->mutex = mutex;
+        pthread_create(&threads[i], NULL, do_work, (void *)arguments[i]);
+    }
     
-    args0->id = 1;
-    args1->id = 2;
-    args2->id = 3;
+    for(int i = 0; i < 4; i++)
+    {
+        pthread_join(threads[i], NULL);
+    }
     
-    args0->buffer = buffer;
-    args1->buffer = buffer;
-    args2->buffer = buffer;
-    
-    args0->mutex = mutex;
-    args1->mutex = mutex;
-    args2->mutex = mutex;
-    
-    pthread_create(&thread_0, NULL, do_work, (void *)args0);
-    pthread_create(&thread_1, NULL, do_work, (void *)args1);
-    pthread_create(&thread_2, NULL, do_work, (void *)args2);
-    
-    pthread_join(thread_0, NULL);
-    pthread_join(thread_1, NULL);
-    pthread_join(thread_2, NULL);
-    
-    printf("Total sequences generated: %d\n", counter);
-    printf("Number of correct sequences: %d\n", successes);
+    printf("Total sequences generated team1: %d\n", count[0]);
+    printf("Number of correct sequences team1: %d\n", suc[0]);
 }
 
-void *do_work(void *args)
+void *do_work(void *arg)
 {
-    struct arguments *arguments = (struct arguments *)args;
-    
-    int id = arguments->id;
-    int *buffer = arguments->buffer;
-    pthread_mutex_t mutex = arguments->mutex;
+    struct args *argu = (struct args *)arg;
+    int id = argu->id;
+    int *count = argu->count;
+    int *suc = argu->suc;
+    int *buffer = argu->buffer;
+    pthread_mutex_t mutex = argu->mutex;
     int index = 0;
     
-    while(successes < 10)
+    while(suc[0] < 10)
     {
+        usleep(50000);
+        
         pthread_mutex_lock(&mutex);
-        while(buffer[index] != 0)
+        
+        if(suc[0] >= 10)
         {
-            if(buffer[index] == id || index > 2)
-            {
-                index == 0;
-                pthread_mutex_unlock(&mutex);
-                usleep(50000);
-                continue;
-            }
-            index++;
+            pthread_mutex_unlock(&mutex);
+            break;
         }
-        buffer[index] = id;
-        printf("My id: %d\n", id);
+        
+        for(index = 0; index < 3; index++)
+        {
+            if(buffer[index] == id)
+            {
+                index = -1;
+                break;
+            }
+            if(buffer[index] == 0)
+            {
+                printf("My id: %d\n", id);
+                buffer[index] = id;
+                break;
+            }
+        }
+        
         if(index == 2)
         {
-            counter = counter + 1;
+            count[0] = count[0] + 1;
             if(buffer[0] == 1 && buffer[1] == 2 && buffer[2] == 3)
             {
-                successes = successes + 1;
                 printf("123\n");
+                suc[0] = suc[0] + 1;
             }
             buffer[0] = 0;
             buffer[1] = 0;
             buffer[2] = 0;
         }
-        index = 0;
         pthread_mutex_unlock(&mutex);
-        usleep(50000);
     }
 }
