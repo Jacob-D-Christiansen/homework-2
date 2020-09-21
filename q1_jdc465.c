@@ -45,8 +45,8 @@ int main()
         pthread_join(threads[i], NULL);
     }
     
-    printf("Total sequences generated team1: %d\n", count[0]);
-    printf("Number of correct sequences team1: %d\n", suc[0]);
+    printf("Total sequences generated: %d\n", count[0]);
+    printf("Number of correct sequences: %d\n", suc[0]);
 }
 
 void *do_work(void *arg)
@@ -61,8 +61,6 @@ void *do_work(void *arg)
     
     while(suc[0] < 10)
     {
-        usleep(50000);
-        
         pthread_mutex_lock(&mutex);
         
         if(suc[0] >= 10)
@@ -78,7 +76,7 @@ void *do_work(void *arg)
                 index = -1;
                 break;
             }
-            if(buffer[index] == 0)
+            else if(buffer[index] == 0)
             {
                 printf("My id: %d\n", id);
                 buffer[index] = id;
@@ -98,6 +96,8 @@ void *do_work(void *arg)
             buffer[1] = 0;
             buffer[2] = 0;
         }
+        
         pthread_mutex_unlock(&mutex);
+        usleep(500000);
     }
 }

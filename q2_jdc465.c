@@ -68,7 +68,7 @@ int main()
     printf("Number of correct sequences team1: %d\n", suc1[0]);
     
     printf("Total sequences generated team2: %d\n", count2[0]);
-    printf("Number of correct sequences team1: %d\n", suc2[0]);
+    printf("Number of correct sequences team2: %d\n", suc2[0]);
 }
 
 void *do_work1(void *arg)
@@ -85,7 +85,6 @@ void *do_work1(void *arg)
     while(suc[0] < 10 && flag[0] == 0)
     {
         usleep(50000);
-        
         pthread_mutex_lock(&mutex);
         
         if(suc[0] >= 10 || flag[0] > 0)
@@ -121,7 +120,9 @@ void *do_work1(void *arg)
             buffer[1] = 0;
             buffer[2] = 0;
         }
+        
         pthread_mutex_unlock(&mutex);
+        usleep(50000);
     }
     if(flag[0] == 0)
     {
@@ -144,7 +145,6 @@ void *do_work2(void * arg)
     while(suc[0] < 10 && flag[0] == 0)
     {
         usleep(50000);
-        
         pthread_mutex_lock(&mutex);
         
         if(suc[0] >= 10 || flag[0] > 0)
@@ -180,7 +180,9 @@ void *do_work2(void * arg)
             buffer[1] = 0;
             buffer[2] = 0;
         }
+        
         pthread_mutex_unlock(&mutex);
+        usleep(50000);
     }
     
     if(flag[0] == 0)
